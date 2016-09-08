@@ -28,6 +28,7 @@ import org.wso2.carbon.andes.core.internal.configuration.util.ConfigurationPrope
 import org.wso2.carbon.andes.core.internal.slot.Slot;
 import org.wso2.carbon.andes.core.internal.slot.SlotState;
 import org.wso2.carbon.andes.core.subscription.BasicSubscription;
+import org.wso2.carbon.andes.core.util.TransportData;
 
 import java.util.List;
 import java.util.Map;
@@ -858,5 +859,36 @@ public class FailureObservingAndesContextStore implements AndesContextStore {
     @Override
     public void removeProtocolType(ProtocolType protocolType) {
         wrappedAndesContextStoreInstance.removeProtocolType(protocolType);
+    }
+
+    /**
+     * Add AMQP details.
+     * @param amqpHost AMQP Host
+     * @param amqpPort AMQP Port
+     * @throws AndesException
+     */
+    @Override
+    public void addAmqpAddress(String amqpHost, String amqpPort) throws AndesException {
+        wrappedAndesContextStoreInstance.addAmqpAddress(amqpHost,amqpPort);
+    }
+
+    /**
+     * Clear AMQP details when node down.
+     * @param amqpHost AMQP Host
+     * @throws AndesException
+     */
+    @Override
+    public void removeAmqpAddress(String amqpHost) throws AndesException {
+        wrappedAndesContextStoreInstance.removeAmqpAddress(amqpHost);
+    }
+
+    /**
+     * Get list of transport details.
+     * @return TransportData list.
+     * @throws AndesException
+     */
+    @Override
+    public List<TransportData> getAllTransportDetails() throws AndesException {
+            return wrappedAndesContextStoreInstance.getAllTransportDetails();
     }
 }

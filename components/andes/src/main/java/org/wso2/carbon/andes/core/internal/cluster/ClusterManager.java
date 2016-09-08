@@ -173,6 +173,16 @@ public class ClusterManager implements StoreHealthListener {
      * Perform cleanup tasks before shutdown
      */
     public void prepareLocalNodeForShutDown() throws AndesException {
+
+        //Remove transport details from table when shutdown
+        String andesConfigHostAddress =
+                AndesConfigurationManager.readValue(AndesConfiguration.TRANSPORTS_AMQP_BIND_ADDRESS);
+        try {
+            String amqpHost = InetAddress.getByName(andesConfigHostAddress).getHostAddress();
+            clearAmqpHostAddress(amqpHost);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         //clear stored node IDS and mark subscriptions of node as closed
         clearAllPersistedStatesOfDisappearedNode(nodeId);
     }
@@ -229,6 +239,9 @@ public class ClusterManager implements StoreHealthListener {
      */
     private void initClusterMode() throws AndesException {
 
+        String amqpHost = null;
+        String amqpPort = null;
+
         // Set the cluster agent from the Andes Context.
         this.clusterAgent = AndesContext.getInstance().getClusterAgent();
 
@@ -246,7 +259,21 @@ public class ClusterManager implements StoreHealthListener {
 
         //add node information to durable store
         andesContextStore.storeNodeDetails(nodeId, localMemberHostAddress);
+        try {
+            // getting host address from andes configuration mentioned in broker.xml
+            String andesConfigHostAddress =
+                    AndesConfigurationManager.readValue(AndesConfiguration.TRANSPORTS_AMQP_BIND_ADDRESS);
+             amqpHost = InetAddress.getByName(andesConfigHostAddress).getHostAddress();
 
+            // getting port from andes configuration mentioned in broker.xml
+            Integer carbonPort = AndesConfigurationManager.readValue(AndesConfiguration.TRANSPORTS_AMQP_DEFAULT_CONNECTION_PORT);
+             amqpPort = String.valueOf(carbonPort);
+        }
+        catch (UnknownHostException e){
+            log.error("Host Exception",e);
+        }
+        //add amqp host and the port
+        andesContextStore.addAmqpAddress(amqpHost,amqpPort);
         /**
          * If nodeList size is one, this is the first node joining to cluster. Here we check if
          * there has been any nodes that lived before and somehow suddenly got killed. If there are
@@ -263,6 +290,17 @@ public class ClusterManager implements StoreHealthListener {
                 clearAllPersistedStatesOfDisappearedNode(storedNodeId);
             }
         }
+    }
+
+    /**
+     * Clear AMQP host when node is going to shutdown.
+     * @param amqpHost AMQP host address
+     * @throws AndesException
+     */
+    private void clearAmqpHostAddress(String amqpHost) throws AndesException {
+        log.info("Clearing the Persisted State of Node with ID " + amqpHost);
+        //remove node from nodes list
+        andesContextStore.removeAmqpAddress(amqpHost);
     }
 
     /**

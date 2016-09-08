@@ -84,6 +84,8 @@ public class RDBMSConstants {
     protected static final String RETAINED_METADATA_TABLE = "MB_RETAINED_METADATA";
     protected static final String RETAINED_CONTENT_TABLE = "MB_RETAINED_CONTENT";
 
+    protected static final String NODE_DETAIL_TABLE = "NODE_DETAIL_TABLE";
+
 
     // Message Store table columns
     protected static final String MESSAGE_ID = "MESSAGE_ID";
@@ -97,6 +99,11 @@ public class RDBMSConstants {
     protected static final String DESTINATION_QUEUE = "MESSAGE_DESTINATION";
     protected static final String TOPIC_NAME = "TOPIC_NAME";
     protected static final String TOPIC_ID = "TOPIC_ID";
+
+    //Node detail table columns
+    protected static final String NODE_IP = "NODE_IP";
+    protected static final String NODE_PORT = "NODE_PORT";
+    protected static final String FLAG= "FLAG";
 
     // Andes Context Store tables
     protected static final String DURABLE_SUB_TABLE = "MB_DURABLE_SUBSCRIPTION";
@@ -821,7 +828,45 @@ public class RDBMSConstants {
                     + " SET " + DLC_QUEUE_ID + "=?"
                     + " WHERE " + MESSAGE_ID + "=?";
 
+
+
+
+
+    protected static final String PS_NODE_DETAIL_INSERT =
+            "INSERT INTO " + NODE_DETAIL_TABLE + " ("
+                    + NODE_IP + ","
+                    + NODE_PORT + ")"
+                    + " VALUES (?,?)";
+
+
+
+    protected static final String PS_REMOVE_NODE_DETAIL =
+            "DELETE FROM " + NODE_DETAIL_TABLE
+                    + " WHERE " + NODE_IP + "=?";
+
+
+
+    protected static final String PS_SELECT_ORDERD_NODE_DETAILS =
+            "SELECT " + NODE_IP + "," + NODE_PORT
+                    + " FROM " + NODE_DETAIL_TABLE
+                    + " ORDER BY " + FLAG;
+
+
+
+    protected static final String PS_UPDATE_FLAG_NODE_DETAILS =
+            "UPDATE " + NODE_DETAIL_TABLE
+                    + " SET " + FLAG + " = ? "
+                    + " WHERE " + NODE_IP + " = ?";
+
+
+
     // Message Store related jdbc tasks executed
+    protected static final String TASK_CREATING_NODE_DETAILS = "creating node details";
+    protected static final String TASK_REMOVE_NODE_DETAILS = "  removing node details";
+    protected static final String TASK_UPDATE_NODE_DETAILS = "updating node flag";
+    protected static final String TASK_SELECT_ORDERD_NODE_DETAILS = " selecting orderd node details";
+
+
     protected static final String TASK_STORING_MESSAGE_PARTS = "storing message parts.";
     protected static final String TASK_DELETING_MESSAGE_PARTS = "deleting message parts.";
     protected static final String TASK_RETRIEVING_MESSAGE_PARTS = "retrieving message parts.";

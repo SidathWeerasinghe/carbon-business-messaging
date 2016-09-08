@@ -17,13 +17,12 @@
 package org.wso2.carbon.andes.service.managers.osgi.impl;
 
 import org.wso2.carbon.andes.core.Andes;
+import org.wso2.carbon.andes.core.AndesException;
+import org.wso2.carbon.andes.core.util.TransportData;
 import org.wso2.carbon.andes.service.exceptions.BrokerManagerException;
 import org.wso2.carbon.andes.service.internal.AndesRESTComponentDataHolder;
 import org.wso2.carbon.andes.service.managers.BrokerManagerService;
-import org.wso2.carbon.andes.service.types.BrokerInformation;
-import org.wso2.carbon.andes.service.types.ClusterInformation;
-import org.wso2.carbon.andes.service.types.NodeInformation;
-import org.wso2.carbon.andes.service.types.StoreInformation;
+import org.wso2.carbon.andes.service.types.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +93,12 @@ public class BrokerManagerServiceOSGiImpl implements BrokerManagerService {
      * {@inheritDoc}
      */
     @Override
-    public BrokerInformation getBrokerInformation() throws BrokerManagerException {
-        return null;
+    public BrokerInformation getBrokerInformation() throws BrokerManagerException, AndesException {
+
+        BrokerInformation brokerInformation = new BrokerInformation();
+        List<TransportData> properties = null;
+            properties = andesInstance.getBrokerDetails();
+            brokerInformation.setProperties(properties);
+        return brokerInformation;
     }
 }

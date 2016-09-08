@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.andes.core.Andes;
 import org.wso2.carbon.andes.core.AndesKernelBoot;
+import org.wso2.carbon.andes.core.internal.cluster.ClusterResourceHolder;
 import org.wso2.carbon.andes.core.internal.cluster.coordination.hazelcast.HazelcastAgent;
 import org.wso2.carbon.andes.core.internal.configuration.AndesConfigurationManager;
 import org.wso2.carbon.andes.core.security.AndesAuthenticationManager;
@@ -126,6 +127,8 @@ public class AndesServiceComponent {
      */
     @Deactivate
     protected void stop() throws Exception {
+        //remove amqp host from database table
+        ClusterResourceHolder.getInstance().getClusterManager().prepareLocalNodeForShutDown();
         // Unregister Greeter OSGi service
         serviceRegistration.unregister();
 

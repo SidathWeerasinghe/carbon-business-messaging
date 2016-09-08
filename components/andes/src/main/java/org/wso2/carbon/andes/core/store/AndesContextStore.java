@@ -28,6 +28,7 @@ import org.wso2.carbon.andes.core.internal.configuration.util.ConfigurationPrope
 import org.wso2.carbon.andes.core.internal.slot.Slot;
 import org.wso2.carbon.andes.core.internal.slot.SlotState;
 import org.wso2.carbon.andes.core.subscription.BasicSubscription;
+import org.wso2.carbon.andes.core.util.TransportData;
 
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,7 @@ public interface AndesContextStore extends HealthAwareStore {
      *
      * @return map of node information
      */
-    Map<String, String> getAllStoredNodeData() throws AndesException;
+    Map<String,String> getAllStoredNodeData() throws AndesException;
 
     /**
      * Remove stored node information.
@@ -489,4 +490,23 @@ public interface AndesContextStore extends HealthAwareStore {
      */
     void removeProtocolType(ProtocolType protocolType);
 
+    /**
+     * Add AMQP Host and the AMQP port
+     * @param amqpHost AMQP Host
+     * @param amqpPort AMQP Port
+     */
+    void addAmqpAddress(String amqpHost, String amqpPort) throws AndesException;
+
+    /**
+     * Remove Host when Host go down.
+     * @param amqpHost AMQP Host
+     */
+    void removeAmqpAddress(String amqpHost) throws AndesException;
+
+    /**
+     *
+     * @return List of TransportData objects which contains AMQP Host and AMQP Port
+     * @throws AndesException
+     */
+    List<TransportData> getAllTransportDetails() throws AndesException;
 }

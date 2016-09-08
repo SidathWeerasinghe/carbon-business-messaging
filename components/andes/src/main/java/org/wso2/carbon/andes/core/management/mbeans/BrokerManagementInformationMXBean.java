@@ -18,10 +18,11 @@
 
 package org.wso2.carbon.andes.core.management.mbeans;
 
+import org.wso2.carbon.andes.core.AndesException;
 import org.wso2.carbon.andes.core.ProtocolType;
+import org.wso2.carbon.andes.core.util.TransportData;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -74,7 +75,7 @@ public interface BrokerManagementInformationMXBean {
     /**
      * Gets details about the broker.
      *
-     * @return A map with property key and property value.
+     * @return A list with host and the port.
      */
-    Map<String, String> getBrokerDetails();
+    List<TransportData> getBrokerDetails() throws AndesException;
 }

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.andes.service.managers;
 
+import org.wso2.carbon.andes.core.AndesException;
 import org.wso2.carbon.andes.service.exceptions.BrokerManagerException;
 import org.wso2.carbon.andes.service.types.BrokerInformation;
 import org.wso2.carbon.andes.service.types.ClusterInformation;
@@ -68,5 +69,5 @@ public interface BrokerManagerService {
      * @return Broker configuration related information.
      * @throws BrokerManagerException
      */
-    BrokerInformation getBrokerInformation() throws BrokerManagerException;
+    BrokerInformation getBrokerInformation() throws BrokerManagerException, AndesException;
 }

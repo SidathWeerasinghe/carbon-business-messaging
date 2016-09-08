@@ -18,9 +18,10 @@ package org.wso2.carbon.andes.service.types;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.andes.core.util.TransportData;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represent a broker information object.
@@ -28,13 +29,13 @@ import java.util.Map;
 @ApiModel(value = "Broker Information", description = "Contains properties of the current node.")
 public class BrokerInformation {
     @ApiModelProperty(value = "A map that contains the properties of the current node.")
-    private Map<String, String> properties = new HashMap<>();
+    private List<TransportData> properties = new ArrayList<>();
 
-    public Map<String, String> getProperties() {
+    public List<TransportData> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(List<TransportData> properties) {
         this.properties = properties;
     }
 }

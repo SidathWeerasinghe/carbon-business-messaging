@@ -20,41 +20,24 @@ package org.wso2.carbon.andes.core;
 
 import com.gs.collections.impl.list.mutable.primitive.LongArrayList;
 import com.gs.collections.impl.map.mutable.primitive.LongObjectHashMap;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.andes.core.internal.AndesContext;
 import org.wso2.carbon.andes.core.internal.cluster.ClusterResourceHolder;
 import org.wso2.carbon.andes.core.internal.configuration.AndesConfigurationManager;
 import org.wso2.carbon.andes.core.internal.configuration.enums.AndesConfiguration;
-import org.wso2.carbon.andes.core.internal.inbound.FlowControlListener;
-import org.wso2.carbon.andes.core.internal.inbound.FlowControlManager;
-import org.wso2.carbon.andes.core.internal.inbound.InboundAndesChannelEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundBindingEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundDeleteDLCMessagesEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundDeleteMessagesEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundEventManager;
-import org.wso2.carbon.andes.core.internal.inbound.InboundExchangeEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundKernelOpsEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundQueueEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundSubscriptionEvent;
-import org.wso2.carbon.andes.core.internal.inbound.InboundTransactionEvent;
-import org.wso2.carbon.andes.core.internal.inbound.PubAckHandler;
+import org.wso2.carbon.andes.core.internal.inbound.*;
 import org.wso2.carbon.andes.core.internal.metrics.MetricsConstants;
 import org.wso2.carbon.andes.core.internal.slot.Slot;
 import org.wso2.carbon.andes.core.resource.manager.AndesResourceManager;
 import org.wso2.carbon.andes.core.subscription.LocalSubscription;
 import org.wso2.carbon.andes.core.subscription.SubscriptionEngine;
 import org.wso2.carbon.andes.core.util.MessageTracer;
+import org.wso2.carbon.andes.core.util.TransportData;
 import org.wso2.carbon.metrics.core.Level;
 import org.wso2.carbon.metrics.core.Meter;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -893,12 +876,11 @@ public class Andes {
     /**
      * Gets broker related information.
      *
-     * @return A map with property key and property value.
+     * @return A list with AMQP host and port.
      */
-    public Map<String, String> getBrokerDetails() {
-        Map<String, String> details = new HashMap<>();
-        details.put("Supported Protocols", StringUtils.join(getSupportedProtocols(), ','));
-        return details;
+    public List<TransportData> getBrokerDetails()throws AndesException {
+
+        return AndesContext.getInstance().getAndesContextStore().getAllTransportDetails();
     }
 }
 

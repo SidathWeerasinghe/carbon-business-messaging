@@ -19,12 +19,7 @@
 package org.wso2.carbon.andes.core.store.rdbms;
 
 import org.apache.log4j.Logger;
-import org.wso2.carbon.andes.core.AndesBinding;
-import org.wso2.carbon.andes.core.AndesException;
-import org.wso2.carbon.andes.core.AndesExchange;
-import org.wso2.carbon.andes.core.AndesQueue;
-import org.wso2.carbon.andes.core.AndesSubscription;
-import org.wso2.carbon.andes.core.ProtocolType;
+import org.wso2.carbon.andes.core.*;
 import org.wso2.carbon.andes.core.internal.AndesContext;
 import org.wso2.carbon.andes.core.internal.configuration.util.ConfigurationProperties;
 import org.wso2.carbon.andes.core.internal.metrics.MetricsConstants;
@@ -34,21 +29,16 @@ import org.wso2.carbon.andes.core.store.AndesContextStore;
 import org.wso2.carbon.andes.core.store.AndesDataIntegrityViolationException;
 import org.wso2.carbon.andes.core.store.DurableStoreConnection;
 import org.wso2.carbon.andes.core.subscription.BasicSubscription;
+import org.wso2.carbon.andes.core.util.TransportData;
 import org.wso2.carbon.metrics.core.Level;
 import org.wso2.carbon.metrics.core.Timer;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.sql.DataSource;
+import java.util.*;
 
 /**
  * ANSI SQL based Andes Context Store implementation. This is used to persist information of
@@ -1982,5 +1972,112 @@ public class RDBMSAndesContextStoreImpl implements AndesContextStore {
     @Override
     public void removeProtocolType(ProtocolType protocolType) {
         protocols.remove(protocolType);
+    }
+
+    /**
+     * Add AMQP host and the port when add node to cluster.
+     * @param amqpHost AMQP Host
+     * @param amqpPort AMQP Port
+     * @throws AndesException
+     */
+    @Override
+    public void addAmqpAddress(String amqpHost, String amqpPort) throws AndesException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = getConnection();
+            preparedStatement =
+                    connection.prepareStatement(RDBMSConstants.PS_NODE_DETAIL_INSERT);
+            preparedStatement.setString(1, amqpHost);
+            preparedStatement.setString(2, amqpPort);
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (Exception e) {
+            String errMsg =
+                    RDBMSConstants.TASK_CREATING_NODE_DETAILS + " amqpHost: " + amqpHost + " amqpPort: " + amqpPort;
+            rollback(connection, RDBMSConstants.TASK_CREATING_NODE_DETAILS);
+            logger.error(errMsg);
+
+        } finally {
+            close(preparedStatement, RDBMSConstants.TASK_CREATING_NODE_DETAILS);
+            close(connection, RDBMSConstants.TASK_CREATING_NODE_DETAILS);
+        }
+    }
+
+    /**
+     * Clear AMQP host.
+     * @param amqpHost AMQP Host
+     * @throws AndesException
+     */
+    @Override
+    public void removeAmqpAddress(String amqpHost) throws AndesException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(RDBMSConstants.PS_REMOVE_NODE_DETAIL);
+            preparedStatement.setString(1,amqpHost);
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            String errMsg =
+                    RDBMSConstants.TASK_REMOVE_NODE_DETAILS + " amqp_Host: " + amqpHost;
+            rollback(connection, RDBMSConstants.TASK_REMOVE_NODE_DETAILS);
+            logger.error(errMsg);
+
+        } finally {
+            close(preparedStatement, RDBMSConstants.TASK_REMOVE_NODE_DETAILS);
+            close(connection, RDBMSConstants.TASK_REMOVE_NODE_DETAILS);
+        }
+    }
+
+    /**
+     * Get all live nodes transport details and set set falg.
+     * @return List of transport data.
+     * @throws AndesException
+     */
+    @Override
+    public List<TransportData> getAllTransportDetails() throws AndesException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatementUpdate = null;
+        PreparedStatement preparedStatementUpdate2 = null;
+        ResultSet resultSet = null;
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(RDBMSConstants.PS_SELECT_ORDERD_NODE_DETAILS);
+            resultSet = preparedStatement.executeQuery();
+
+            List<TransportData> transportDataList = new ArrayList<>();
+            // iterate through the result set and add to transport data List
+            while (resultSet.next()) {
+                TransportData transportData = new TransportData(
+                        resultSet.getString(RDBMSConstants.NODE_IP), resultSet.getString(RDBMSConstants.NODE_PORT)
+                );
+                transportDataList.add(transportData);
+            }
+            preparedStatementUpdate = connection.prepareStatement(RDBMSConstants.PS_UPDATE_FLAG_NODE_DETAILS);
+            preparedStatementUpdate.setInt(1, 0);
+            preparedStatementUpdate.setString(2, transportDataList.get(transportDataList.size() - 1).getAmqpHost());
+            preparedStatementUpdate.executeUpdate();
+
+            preparedStatementUpdate2 = connection.prepareStatement(RDBMSConstants.PS_UPDATE_FLAG_NODE_DETAILS);
+            preparedStatementUpdate2.setInt(1, 1);
+            preparedStatementUpdate2.setString(2, transportDataList.get(0).getAmqpHost());
+            preparedStatementUpdate2.executeUpdate();
+            connection.commit();
+            return transportDataList;
+        } catch (SQLException e) {
+            throw rdbmsStoreUtils.convertSQLException(
+                    "Error occurred while " + RDBMSConstants.TASK_SELECT_ORDERD_NODE_DETAILS, e);
+        } finally {
+            close(resultSet, RDBMSConstants.TASK_SELECT_ORDERD_NODE_DETAILS);
+            close(preparedStatement, RDBMSConstants.TASK_SELECT_ORDERD_NODE_DETAILS);
+            close(preparedStatementUpdate, RDBMSConstants.TASK_UPDATE_NODE_DETAILS);
+            close(preparedStatementUpdate2, RDBMSConstants.TASK_UPDATE_NODE_DETAILS);
+            close(connection, RDBMSConstants.TASK_SELECT_ORDERD_NODE_DETAILS);
+        }
     }
 }

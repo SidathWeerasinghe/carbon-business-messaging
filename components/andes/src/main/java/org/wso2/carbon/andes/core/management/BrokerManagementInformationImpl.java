@@ -19,11 +19,12 @@
 package org.wso2.carbon.andes.core.management;
 
 import org.wso2.carbon.andes.core.Andes;
+import org.wso2.carbon.andes.core.AndesException;
 import org.wso2.carbon.andes.core.ProtocolType;
 import org.wso2.carbon.andes.core.management.mbeans.BrokerManagementInformationMXBean;
+import org.wso2.carbon.andes.core.util.TransportData;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -96,7 +97,7 @@ public class BrokerManagementInformationImpl implements BrokerManagementInformat
      * {@inheritDoc}
      */
     @Override
-    public Map<String, String> getBrokerDetails() {
+    public List<TransportData> getBrokerDetails() throws AndesException{
         return andesInstance.getBrokerDetails();
     }
 }

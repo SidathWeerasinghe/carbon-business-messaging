@@ -16,33 +16,15 @@
 
 package org.wso2.carbon.andes.service.internal;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Contact;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.License;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.andes.core.Andes;
-import org.wso2.carbon.andes.core.AndesConstants;
-import org.wso2.carbon.andes.core.AndesException;
-import org.wso2.carbon.andes.core.DestinationType;
-import org.wso2.carbon.andes.core.ProtocolType;
+import org.wso2.carbon.andes.core.*;
 import org.wso2.carbon.andes.core.util.DLCQueueUtils;
 import org.wso2.carbon.andes.service.exceptions.BrokerManagerException;
 import org.wso2.carbon.andes.service.exceptions.DLCQueueNotFoundException;
@@ -82,26 +64,17 @@ import org.wso2.carbon.andes.service.types.Subscription;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Andes REST service is a microservice built on top of WSO2 msf4j. The REST service provides the capability of managing
@@ -1401,7 +1374,7 @@ public class AndesRESTService implements Microservice {
                          response = BrokerInformation.class),
             @ApiResponse(code = 404, message = "Broker properties not found.", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Server Error.", response = ErrorResponse.class)})
-    public Response getBrokerInformation() throws InternalServerException {
+    public Response getBrokerInformation() throws InternalServerException ,AndesException {
         try {
             BrokerInformation brokerInformation = brokerManagerService.getBrokerInformation();
             if (null != brokerInformation) {
